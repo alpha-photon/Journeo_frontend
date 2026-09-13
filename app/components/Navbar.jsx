@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { useFlag } from '../context/FeatureFlagContext';
 import AnnouncementBanner from './AnnouncementBanner';
+import { IconStar } from './icons';
 
 export default function Navbar({ onAuthClick, rightContent }) {
   const { user, loading, logout } = useAuth();
@@ -144,7 +145,7 @@ export default function Navbar({ onAuthClick, rightContent }) {
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center px-3 py-2.5 rounded-xl text-sm text-ink-soft hover:text-ink hover:bg-paper-warm transition-all"
                       >
-                        ★ Pricing & Pro
+                        <IconStar size={14} className="mr-1.5" filled />Pricing & Pro
                       </Link>
                     )}
                     <button

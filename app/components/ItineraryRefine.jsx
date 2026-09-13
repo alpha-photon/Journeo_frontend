@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { withAuth } from '../../lib/auth';
+import { IconSparkles } from './icons';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003';
 
@@ -42,7 +43,7 @@ export default function ItineraryRefine({ shareId }) {
         onClick={() => setOpen(true)}
         className="mb-6 w-full flex items-center gap-2.5 px-4 py-3 rounded-2xl border border-dashed border-line hover:border-saffron/40 bg-paper-warm hover:bg-saffron-subtle text-sm text-ink-soft hover:text-saffron-deep transition-all"
       >
-        <span className="text-base">✨</span>
+        <IconSparkles size={16} />
         Not quite right? Give feedback and regenerate this itinerary
       </button>
     );

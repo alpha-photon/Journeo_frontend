@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { IconChevronRight } from './icons';
 
 const TRAVEL_STYLES = [
   { value: 'budget',    label: 'Budget',    desc: 'Hostels, street food, local transport' },
@@ -35,6 +36,14 @@ export default function ItineraryForm({ onSubmit }) {
   });
   const [selectedRequirements, setSelectedRequirements] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+
+  // Shown on the collapsed toggle so nothing set inside is invisible.
+  const optionalCount =
+    (form.startDate ? 1 : 0) +
+    (form.budgetPerDay ? 1 : 0) +
+    (selectedRequirements.length ? 1 : 0) +
+    (form.specialRequirements.trim() ? 1 : 0);
 
   const toggleRequirement = (req) =>
     setSelectedRequirements((prev) =>
@@ -77,61 +86,32 @@ export default function ItineraryForm({ onSubmit }) {
         </div>
       </div>
 
-      {/* Days + Date */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+      {/* Duration */}
+      <div className="mb-5">
         <div>
           <label className={labelClass}>
             Duration —{' '}
             <span className="text-saffron normal-case tracking-normal font-semibold">{form.days} days</span>
           </label>
-          <div className="space-y-3">
-            <input
-              type="range" min={1} max={14} value={form.days}
-              onChange={(e) => setForm({ ...form, days: parseInt(e.target.value) })}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-saffron bg-line"
-            />
-            <div className="flex gap-1.5 flex-wrap">
-              {[1, 3, 5, 7, 10, 14].map((d) => (
-                <button
-                  key={d} type="button"
-                  onClick={() => setForm({ ...form, days: d })}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    form.days === d
-                      ? 'bg-ink text-paper shadow-warm-sm'
-                      : 'bg-paper-warm text-ink-muted hover:bg-line hover:text-ink-soft border border-line'
-                  }`}
-                >
-                  {d}d
-                </button>
-              ))}
-            </div>
+          {/* One control, not two — the slider and preset pills previously set
+              the same value. Even grid keeps the row aligned at any width. */}
+          <div className="grid grid-cols-5 gap-1.5">
+            {[1, 2, 3, 4, 5, 6, 7, 10, 12, 14].map((d) => (
+              <button
+                key={d} type="button"
+                onClick={() => setForm({ ...form, days: d })}
+                className={`py-2 rounded-lg text-xs font-semibold transition-all ${
+                  form.days === d
+                    ? 'bg-ink text-paper shadow-warm-sm'
+                    : 'bg-paper-warm text-ink-muted hover:bg-line hover:text-ink-soft border border-line'
+                }`}
+              >
+                {d}d
+              </button>
+            ))}
           </div>
         </div>
 
-        <div>
-          <label className={labelClass}>
-            Start Date <span className="text-ink-muted normal-case tracking-normal font-normal">(optional)</span>
-          </label>
-          <div className="relative">
-            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B665D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <input
-              type="date" value={form.startDate}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              className={`${inputClass} pl-10`}
-            />
-          </div>
-          {form.startDate && (
-            <div className="flex items-center justify-between mt-1.5">
-              <span className="text-xs text-saffron font-mono">
-                Ends {new Date(new Date(form.startDate).getTime() + (form.days - 1) * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </span>
-              <button type="button" onClick={() => setForm({ ...form, startDate: '' })} className="text-xs text-ink-muted hover:text-ink transition-colors">Clear</button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Travel Style */}
@@ -160,8 +140,52 @@ export default function ItineraryForm({ onSubmit }) {
         </p>
       </div>
 
+      {/* Optional details — collapsed by default so the form stays short and
+          the primary CTA sits above the fold. */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setShowMore((v) => !v)}
+          className="flex items-center gap-2 text-sm text-ink-muted hover:text-ink transition-colors"
+        >
+          <span className={`transition-transform duration-200 ${showMore ? 'rotate-90' : ''}`}>
+            <IconChevronRight size={14} />
+          </span>
+          {showMore ? 'Hide extra options' : 'Add dates, budget & preferences'}
+          {!showMore && optionalCount > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-saffron-subtle text-saffron-deep text-[10px] font-mono">{optionalCount} set</span>
+          )}
+        </button>
+
+        {showMore && (
+          <div className="mt-4 pt-4 border-t border-line animate-fade-in">
+        <div className="mb-5">
+          <label className={labelClass}>
+            Start Date <span className="text-ink-muted normal-case tracking-normal font-normal">(optional)</span>
+          </label>
+          <div className="relative">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B665D" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <input
+              type="date" value={form.startDate}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+              className={`${inputClass} pl-10`}
+            />
+          </div>
+          {form.startDate && (
+            <div className="flex items-center justify-between mt-1.5">
+              <span className="text-xs text-saffron font-mono">
+                Ends {new Date(new Date(form.startDate).getTime() + (form.days - 1) * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+              <button type="button" onClick={() => setForm({ ...form, startDate: '' })} className="text-xs text-ink-muted hover:text-ink transition-colors">Clear</button>
+            </div>
+          )}
+        </div>
+
       {/* Budget */}
-      <div className="mb-5">
+        <div className="mb-5">
         <label className={labelClass}>
           Daily Budget <span className="text-ink-muted normal-case tracking-normal font-normal">(optional)</span>
         </label>
@@ -180,7 +204,7 @@ export default function ItineraryForm({ onSubmit }) {
       </div>
 
       {/* Quick Requirements */}
-      <div className="mb-6">
+        <div className="mb-6">
         <label className={labelClass}>
           Preferences <span className="text-ink-muted normal-case tracking-normal font-normal">(optional)</span>
         </label>
@@ -206,6 +230,10 @@ export default function ItineraryForm({ onSubmit }) {
           onChange={(e) => setForm({ ...form, specialRequirements: e.target.value })}
           className={inputClass}
         />
+      </div>
+
+          </div>
+        )}
       </div>
 
       {/* Submit */}

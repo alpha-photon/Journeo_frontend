@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { IconFile } from './icons';
 
 export default function PDFExport({ itinerary, destination }) {
   const [exporting, setExporting] = useState(false);
@@ -297,7 +298,9 @@ export default function PDFExport({ itinerary, destination }) {
       disabled={exporting}
       className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:border-slate-500 transition-all disabled:opacity-50"
     >
-      <span>{exporting ? '⏳' : '📄'}</span>
+      {exporting
+        ? <span className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" />
+        : <IconFile size={14} />}
       <span>{exporting ? 'Exporting...' : 'Export PDF'}</span>
     </button>
   );

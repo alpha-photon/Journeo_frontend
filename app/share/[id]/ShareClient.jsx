@@ -17,6 +17,7 @@ import TripJournal from '../../components/TripJournal';
 import AuthModal from '../../components/AuthModal';
 import { useAuth } from '../../context/AuthContext';
 import { useFlag, useFlagOrder } from '../../context/FeatureFlagContext';
+import { IconEye, IconUsers, IconStar, IconLink, IconCheck, IconMap, IconPlane } from '../../components/icons';
 import { withAuth } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003';
@@ -199,7 +200,7 @@ export default function ShareClient({ shareId }) {
         <Navbar />
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-md">
-            <div className="text-5xl mb-4">🗺️</div>
+            <IconMap size={44} className="text-ink-muted mx-auto mb-4" />
             <h2 className="font-serif text-xl font-semibold text-ink mb-2">Itinerary Not Found</h2>
             <p className="text-ink-muted mb-6">{error}</p>
             <Link href="/" className="px-6 py-3 bg-ink hover:bg-ink-soft text-paper rounded-xl font-medium transition-colors">
@@ -222,17 +223,17 @@ export default function ShareClient({ shareId }) {
     <div className="min-h-screen bg-paper">
       <Navbar onAuthClick={() => setAuthOpen(true)} rightContent={
         <div className="flex items-center gap-2">
-          <span className="text-xs text-ink-muted hidden sm:inline font-mono">👁️ {views} views</span>
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-ink-muted font-mono"><IconEye size={13} /> {views} views</span>
 
           {collabEnabled && saveStatus === 'owned' && !collaboration && (
             <button onClick={handleEnableCollab} disabled={enabling} title="Invite friends to vote, comment, and suggest changes"
               className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl border bg-paper-warm text-ink-soft border-line hover:border-saffron/30 hover:text-saffron-deep transition-all disabled:opacity-50">
-              {enabling ? '...' : '👥 Invite Group'}
+              {enabling ? '…' : <><IconUsers size={14} /> Invite Group</>}
             </button>
           )}
           {collaboration && (
             <span className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl bg-saffron-subtle border border-saffron/20 text-saffron-deep font-mono">
-              👥 {1 + (collaboration.collaborators?.length || 0)}
+              <IconUsers size={13} /> {1 + (collaboration.collaborators?.length || 0)}
             </span>
           )}
 
@@ -241,7 +242,7 @@ export default function ShareClient({ shareId }) {
               className={`flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl border transition-all ${
                 isSaved ? 'bg-jade-subtle text-jade border-jade/30' : 'bg-paper-warm text-ink-soft border-line hover:border-saffron/30'
               } disabled:opacity-50 disabled:cursor-not-allowed`}>
-              {saving ? <span className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" /> : <span>{isSaved ? '★' : '☆'}</span>}
+              {saving ? <span className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" /> : <IconStar size={14} filled={isSaved} />}
               <span className="hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
             </button>
           )}
@@ -250,7 +251,7 @@ export default function ShareClient({ shareId }) {
             className={`flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl border transition-all ${
               copied ? 'bg-jade-subtle text-jade border-jade/30' : 'bg-paper-warm text-ink-soft border-line hover:border-saffron/30'
             }`}>
-            {copied ? '✓ Copied' : '🔗 Copy Link'}
+            {copied ? <><IconCheck size={14} /> Copied</> : <><IconLink size={14} /> Copy Link</>}
           </button>
           <Link href="/" className="hidden sm:inline-flex text-sm px-3 py-2 rounded-xl bg-ink hover:bg-ink-soft text-paper border border-ink transition-all">
             Plan My Trip →
@@ -262,32 +263,33 @@ export default function ShareClient({ shareId }) {
       <div className="relative bg-ink border-b border-ink-soft py-8 px-4">
         <div className="absolute top-0 right-0 w-64 h-64 bg-saffron/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto relative">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="eyebrow text-saffron">Shared Itinerary</span>
-                <span className="text-xs text-paper/30">·</span>
-                <code className="text-xs text-paper/40 font-mono">{shareId}</code>
-                {saveStatus === 'owned' && <span className="text-xs px-2 py-0.5 rounded-full bg-saffron-subtle border border-saffron/20 text-saffron-deep font-mono">Your trip</span>}
-                {saveStatus === 'saved' && <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-paper/60 font-mono">Saved</span>}
-                {collaboration && <span className="text-xs px-2 py-0.5 rounded-full bg-indigo/20 border border-indigo/30 text-indigo-light font-mono">Collaborative</span>}
-              </div>
-              <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-paper">
-                {itinerary?.destination}<em className="text-saffron">.</em>
-              </h1>
-              {itinerary?.overview && (
-                <p className="text-paper/60 mt-2 max-w-2xl text-sm leading-relaxed">{itinerary.overview}</p>
-              )}
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <span className="eyebrow text-saffron">Shared Itinerary</span>
+              {saveStatus === 'owned' && <span className="text-xs px-2 py-0.5 rounded-full bg-saffron-subtle border border-saffron/20 text-saffron-deep font-mono">Your trip</span>}
+              {saveStatus === 'saved' && <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-paper/60 font-mono">Saved</span>}
+              {collaboration && <span className="text-xs px-2 py-0.5 rounded-full bg-indigo/20 border border-indigo/30 text-indigo-light font-mono">Collaborative</span>}
             </div>
-            <div className="flex flex-wrap gap-2">
+            <h1 className="font-serif text-3xl sm:text-4xl font-semibold text-paper">
+              {itinerary?.destination}<em className="text-saffron">.</em>
+            </h1>
+            {itinerary?.overview && (
+              <p className="text-paper/60 mt-2 text-sm leading-relaxed line-clamp-3 sm:line-clamp-none">
+                {itinerary.overview}
+              </p>
+            )}
+
+            {/* Facts sit under the copy in an even 3-up grid — content-sized
+                pills used to wrap raggedly and stretch with long values. */}
+            <div className="grid grid-cols-3 gap-2 mt-5">
               {[
                 { label: 'Duration', value: `${itinerary?.totalDays} Days` },
                 itinerary?.currency && { label: 'Currency', value: itinerary.currency },
                 itinerary?.language && { label: 'Language', value: itinerary.language },
               ].filter(Boolean).map((s) => (
-                <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-center min-w-[80px]">
-                  <p className="text-[10px] text-paper/50 font-mono tracking-wider uppercase">{s.label}</p>
-                  <p className="text-sm font-semibold text-paper mt-0.5">{s.value}</p>
+                <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl px-3 py-2.5 min-w-0">
+                  <p className="text-[10px] text-paper/50 font-mono tracking-wider uppercase truncate">{s.label}</p>
+                  <p className="text-sm font-semibold text-paper mt-0.5 leading-snug line-clamp-2">{s.value}</p>
                 </div>
               ))}
             </div>
@@ -303,7 +305,11 @@ export default function ShareClient({ shareId }) {
       )}
 
       {/* Tabs */}
-      <div className="sticky top-[61px] z-40 bg-paper/95 backdrop-blur-md border-b border-line">
+      {/* Fade sits on the sticky wrapper (not the padded inner container) so it
+          reaches the true viewport edge — signals there are more tabs to scroll
+          to, which were otherwise silently undiscoverable on mobile. */}
+      <div className="sticky top-[61px] z-40 bg-paper/95 backdrop-blur-md border-b border-line relative">
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-14 bg-gradient-to-l from-paper via-paper/90 to-transparent md:hidden z-10" />
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
@@ -348,7 +354,7 @@ export default function ShareClient({ shareId }) {
           <Link href="/" className="text-saffron hover:text-saffron-deep font-medium">Journeo</Link>
         </p>
         <Link href="/" className="inline-flex items-center gap-2 mt-3 px-5 py-2.5 bg-ink hover:bg-ink-soft text-paper rounded-xl text-sm font-medium transition-colors">
-          ✈️ Plan Your Own Trip
+          <IconPlane size={15} /> Plan Your Own Trip
         </Link>
         <div className="mt-4 flex items-center justify-center gap-4 text-xs text-ink-muted font-mono">
           <Link href="/privacy" className="hover:text-ink transition-colors">Privacy Policy</Link>

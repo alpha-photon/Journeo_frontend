@@ -6,6 +6,12 @@ import ActivityVotes from './ActivityVotes';
 import ActivityComments from './ActivityComments';
 import ActivitySuggestions from './ActivitySuggestions';
 import ItineraryRefine from './ItineraryRefine';
+import {
+  IconSunrise, IconSun, IconMoon, IconMapPin, IconCalendar, IconWallet,
+  IconWalk, IconBulb, IconBed, IconBowl, IconWine, IconBus, IconMap,
+  IconPencil, IconCheck, IconClock, IconAlert, IconX, IconChat, IconStar,
+  CATEGORY_ICONS,
+} from './icons';
 
 const TripMap = dynamic(() => import('./TripMap'), { ssr: false });
 
@@ -61,9 +67,9 @@ function EditableField({ value, shareId, fieldPath, className = '', multiline = 
     <span onClick={() => { setEditing(true); setDraft(value); }} title="Click to edit"
       className={`${className} group/edit cursor-text hover:bg-saffron-subtle hover:outline hover:outline-1 hover:outline-saffron/30 rounded px-0.5 transition-all`}>
       {draft}
-      {saved  && <span className="ml-1.5 text-xs text-jade font-normal">saved ✓</span>}
+      {saved  && <span className="inline-flex items-center gap-1 ml-1.5 text-xs text-jade font-normal"><IconCheck size={11} /> saved</span>}
       {error  && <span className="ml-1.5 text-xs text-rose font-normal">{error}</span>}
-      <span className="hidden group-hover/edit:inline ml-1 text-[10px] text-ink-muted">✎</span>
+      <IconPencil size={11} className="hidden group-hover/edit:inline-block ml-1 text-ink-muted align-baseline" />
     </span>
   );
 }
@@ -71,7 +77,7 @@ function EditableField({ value, shareId, fieldPath, className = '', multiline = 
 // ── Slot config — warm palette ─────────────────────────────────────────────────
 const SLOT = {
   morning: {
-    icon: '🌅', label: 'Morning',
+    Icon: IconSunrise, label: 'Morning',
     headerBg:   'bg-marigold-subtle border-marigold/25',
     headerText: 'text-marigold-deep',
     dot:        'bg-marigold',
@@ -82,7 +88,7 @@ const SLOT = {
     numBg:      'bg-marigold-subtle text-marigold-deep',
   },
   afternoon: {
-    icon: '☀️', label: 'Afternoon',
+    Icon: IconSun, label: 'Afternoon',
     headerBg:   'bg-indigo-subtle border-indigo/25',
     headerText: 'text-indigo',
     dot:        'bg-indigo',
@@ -93,7 +99,7 @@ const SLOT = {
     numBg:      'bg-indigo-subtle text-indigo',
   },
   evening: {
-    icon: '🌙', label: 'Evening',
+    Icon: IconMoon, label: 'Evening',
     headerBg:   'bg-rose-subtle border-rose/25',
     headerText: 'text-rose',
     dot:        'bg-rose',
@@ -105,7 +111,7 @@ const SLOT = {
   },
 };
 
-const CAT_ICON  = { attraction: '🏛️', food: '🍽️', activity: '🎯', transport: '🚌', nightlife: '🌃', nature: '🌿', viewpoint: '🌄' };
+const CAT_ICON  = CATEGORY_ICONS;
 const CAT_LABEL = { attraction: 'Attraction', food: 'Food', activity: 'Activity', transport: 'Transport', nightlife: 'Nightlife', nature: 'Nature', viewpoint: 'Viewpoint' };
 const QUICK_CHIPS = ['hidden gem', 'less touristy', 'more budget', 'outdoor', 'adventurous', 'relaxing'];
 
@@ -170,17 +176,22 @@ function ActivityNode({ activity, slot, index, isLast, onSwap, isSwapping, activ
                   {activity.time}
                 </span>
                 {activity.duration && (
-                  <span className="text-xs text-ink-muted">⏱ {activity.duration}</span>
-                )}
-                {activity.category && (
-                  <span className="text-xs text-ink-muted">
-                    {CAT_ICON[activity.category] || '📍'}{' '}
-                    <span className="hidden sm:inline">{CAT_LABEL[activity.category] || activity.category}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+                    <IconClock size={13} /> {activity.duration}
                   </span>
                 )}
+                {activity.category && (() => {
+                  const CatIcon = CAT_ICON[activity.category] || IconMapPin;
+                  return (
+                    <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+                      <CatIcon size={13} />
+                      <span className="hidden sm:inline">{CAT_LABEL[activity.category] || activity.category}</span>
+                    </span>
+                  );
+                })()}
                 {activity.bookingRequired && (
-                  <span className="text-[10px] px-2 py-0.5 bg-saffron-subtle text-saffron-deep rounded-full border border-saffron/20 font-mono">
-                    📅 Book ahead
+                  <span className="inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 bg-saffron-subtle text-saffron-deep rounded-full border border-saffron/20 font-mono">
+                    <IconCalendar size={11} /> Book ahead
                   </span>
                 )}
               </div>
@@ -196,13 +207,13 @@ function ActivityNode({ activity, slot, index, isLast, onSwap, isSwapping, activ
               {/* Chips */}
               <div className="flex items-center gap-2 flex-wrap">
                 {activity.entryFee && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-jade-subtle border border-jade/20 text-jade px-2.5 py-1 rounded-full font-mono">
-                    💰 {activity.entryFee}
+                  <span className="inline-flex items-center gap-1.5 text-xs bg-jade-subtle border border-jade/20 text-jade px-2.5 py-1 rounded-full font-mono">
+                    <IconWallet size={12} /> {activity.entryFee}
                   </span>
                 )}
                 {activity.travelTime && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-paper-warm border border-line text-ink-muted px-2.5 py-1 rounded-full font-mono">
-                    🚶 {activity.travelTime}
+                  <span className="inline-flex items-center gap-1.5 text-xs bg-paper-warm border border-line text-ink-muted px-2.5 py-1 rounded-full font-mono">
+                    <IconWalk size={12} /> {activity.travelTime}
                   </span>
                 )}
               </div>
@@ -264,7 +275,7 @@ function ActivityNode({ activity, slot, index, isLast, onSwap, isSwapping, activ
         {open && activity.tip && (
           <div className="px-5 pb-4 pt-0 animate-slide-up">
             <div className="flex items-start gap-2.5 bg-marigold-subtle border border-marigold/20 rounded-xl p-3.5">
-              <span className="text-marigold shrink-0 mt-0.5">💡</span>
+              <IconBulb size={16} className="text-marigold mt-0.5" />
               <div>
                 <p className="text-xs font-semibold text-marigold-deep mb-1 font-mono tracking-wider">INSIDER TIP</p>
                 <p className="text-sm text-ink-soft leading-relaxed">{activity.tip}</p>
@@ -296,15 +307,17 @@ function ActivityNode({ activity, slot, index, isLast, onSwap, isSwapping, activ
 function MealDivider({ type, value, shareId, fieldPath }) {
   if (!value) return null;
   const config = {
-    lunch:  { icon: '🍱', label: 'Lunch Recommendation',  bg: 'bg-marigold-subtle border-marigold/20',  badge: 'text-marigold-deep' },
-    dinner: { icon: '🍷', label: 'Dinner Recommendation', bg: 'bg-rose-subtle border-rose/20',           badge: 'text-rose' },
+    lunch:  { Icon: IconBowl, label: 'Lunch Recommendation',  bg: 'bg-marigold-subtle border-marigold/20',  badge: 'text-marigold-deep', tint: 'text-marigold-deep' },
+    dinner: { Icon: IconWine, label: 'Dinner Recommendation', bg: 'bg-rose-subtle border-rose/20',           badge: 'text-rose',          tint: 'text-rose' },
   };
   const c = config[type];
   return (
     <div className="flex gap-4 mb-5">
       <div className="flex flex-col items-center w-8 shrink-0">
         <div className="w-px flex-1 bg-line" />
-        <div className="w-7 h-7 rounded-full bg-paper-warm border border-line flex items-center justify-center text-sm z-10 shrink-0 my-1">{c.icon}</div>
+        <div className={`w-7 h-7 rounded-full bg-paper-warm border border-line flex items-center justify-center z-10 shrink-0 my-1 ${c.tint}`}>
+          <c.Icon size={14} />
+        </div>
         <div className="w-px flex-1 bg-line" />
       </div>
       <div className={`flex-1 my-1 border rounded-xl px-4 py-2.5 ${c.bg}`}>
@@ -331,23 +344,32 @@ function DayTimeline({ day, dayIndex, shareId, onSwapActivity, swappingKey, coll
     <div className="animate-fade-in">
       {/* Day meta bar */}
       {(day.accommodation || day.estimatedCost || day.transport) && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-6">
           {day.accommodation && (
-            <div className="flex items-center gap-2 text-xs bg-paper-warm border border-line rounded-xl px-3 py-2">
-              <span className="text-base">🏨</span>
-              <EditableField value={day.accommodation} shareId={shareId} fieldPath={`itinerary.days.${dayIndex}.accommodation`} className="text-ink-soft" />
+            <div className="flex items-start gap-2.5 bg-paper-warm border border-line rounded-xl px-3.5 py-2.5">
+              <IconBed size={15} className="text-ink-muted mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-mono tracking-wider uppercase text-ink-muted mb-0.5">Stay</p>
+                <EditableField value={day.accommodation} shareId={shareId} fieldPath={`itinerary.days.${dayIndex}.accommodation`} className="text-xs text-ink-soft leading-snug" />
+              </div>
             </div>
           )}
           {day.estimatedCost && (
-            <div className="flex items-center gap-2 text-xs bg-paper-warm border border-line rounded-xl px-3 py-2">
-              <span className="text-base">💰</span>
-              <span className="text-ink-soft">{day.estimatedCost}</span>
+            <div className="flex items-start gap-2.5 bg-paper-warm border border-line rounded-xl px-3.5 py-2.5">
+              <IconWallet size={15} className="text-ink-muted mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-mono tracking-wider uppercase text-ink-muted mb-0.5">Est. cost</p>
+                <span className="text-xs text-ink-soft leading-snug">{day.estimatedCost}</span>
+              </div>
             </div>
           )}
           {day.transport && (
-            <div className="flex items-center gap-2 text-xs bg-paper-warm border border-line rounded-xl px-3 py-2">
-              <span className="text-base">🚌</span>
-              <span className="text-ink-soft">{day.transport}</span>
+            <div className="flex items-start gap-2.5 bg-paper-warm border border-line rounded-xl px-3.5 py-2.5">
+              <IconBus size={15} className="text-ink-muted mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-mono tracking-wider uppercase text-ink-muted mb-0.5">Transport</p>
+                <span className="text-xs text-ink-soft leading-snug">{day.transport}</span>
+              </div>
             </div>
           )}
         </div>
@@ -369,7 +391,7 @@ function DayTimeline({ day, dayIndex, shareId, onSwapActivity, swappingKey, coll
         return (
           <div key={slot.key} className="mb-6">
             <div className={`flex items-center gap-2.5 mb-4 px-3 py-2 rounded-xl border ${s.headerBg} w-fit`}>
-              <span className="text-base">{s.icon}</span>
+              <s.Icon size={15} className={s.headerText} />
               <span className={`text-xs font-bold uppercase tracking-widest ${s.headerText} font-mono`}>{s.label}</span>
               <span className={`text-xs font-medium ${s.headerText} opacity-60 font-mono`}>· {acts.length} {acts.length === 1 ? 'activity' : 'activities'}</span>
             </div>
@@ -460,10 +482,10 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
 
       {/* Getting Around Banner */}
       {itinerary.gettingAround && (
-        <div className="flex items-start gap-3 bg-indigo-subtle border border-indigo/20 rounded-2xl px-5 py-4 mb-6">
-          <span className="text-xl shrink-0">🗺️</span>
+        <div className="flex items-start gap-3 bg-paper-warm border border-line rounded-2xl px-5 py-4 mb-6">
+          <IconMap size={18} className="text-saffron-deep mt-0.5" />
           <div>
-            <p className="eyebrow text-indigo mb-0.5">Getting Around</p>
+            <p className="eyebrow text-saffron-deep mb-0.5">Getting Around</p>
             <p className="text-sm text-ink-soft leading-relaxed">{itinerary.gettingAround}</p>
           </div>
         </div>
@@ -483,7 +505,7 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
                   ? 'bg-saffron-subtle border-saffron/40 text-saffron-deep'
                   : 'bg-paper-warm border-line text-ink-muted hover:border-saffron/30'
               }`}>
-              🗺️ {showMap ? 'Hide Map' : 'Show Map'}
+              <IconMap size={13} /> {showMap ? 'Hide Map' : 'Show Map'}
             </button>
           )}
         </div>
@@ -495,18 +517,15 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
             const isActive    = activeDay === day.day;
             return (
               <button key={day.day} onClick={() => setActiveDay(day.day)}
-                className={`shrink-0 flex flex-col items-center px-4 pt-3 pb-3.5 rounded-2xl border transition-all duration-200 min-w-[80px] relative overflow-hidden ${
+                className={`shrink-0 flex flex-col items-center justify-center gap-1 w-[76px] py-3 rounded-2xl border transition-all duration-200 relative overflow-hidden ${
                   isActive
                     ? 'bg-saffron-subtle border-saffron/40 shadow-saffron'
                     : 'bg-white border-line hover:border-saffron/25 hover:bg-saffron-subtle/30 shadow-warm-sm'
                 }`}>
                 {isActive && <div className="absolute inset-x-0 top-0 h-0.5 bg-saffron" />}
-                <span className={`text-[10px] font-semibold uppercase tracking-widest mb-0.5 font-mono ${isActive ? 'text-saffron' : 'text-ink-muted'}`}>Day</span>
+                <span className={`text-[10px] font-semibold uppercase tracking-widest font-mono ${isActive ? 'text-saffron' : 'text-ink-muted'}`}>Day</span>
                 <span className={`text-2xl font-bold leading-none font-serif italic ${isActive ? 'text-saffron-deep' : 'text-ink'}`}>{day.day}</span>
-                {day.theme && (
-                  <span className="text-[9px] text-ink-muted mt-1.5 text-center leading-tight line-clamp-2 max-w-[80px]">{day.theme}</span>
-                )}
-                <span className={`text-[9px] mt-1.5 px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-saffron/15 text-saffron-deep' : 'bg-paper-warm text-ink-muted border border-line'}`}>
+                <span className={`text-[10px] font-mono ${isActive ? 'text-saffron-deep' : 'text-ink-muted'}`}>
                   {dayActCount} stops
                 </span>
               </button>
@@ -583,7 +602,7 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
         {itinerary.generalTips?.length > 0 && (
           <div className="bg-white border border-line rounded-2xl p-5 shadow-warm-sm">
             <h3 className="font-semibold text-ink mb-4 flex items-center gap-2 text-sm">
-              <span className="w-7 h-7 rounded-lg bg-marigold-subtle flex items-center justify-center text-sm">💡</span>
+              <span className="w-7 h-7 rounded-lg bg-marigold-subtle text-marigold-deep flex items-center justify-center"><IconBulb size={15} /></span>
               General Tips
             </h3>
             <ul className="space-y-3">
@@ -600,13 +619,13 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
         {itinerary.avoidList?.length > 0 && (
           <div className="bg-white border border-line rounded-2xl p-5 shadow-warm-sm">
             <h3 className="font-semibold text-ink mb-4 flex items-center gap-2 text-sm">
-              <span className="w-7 h-7 rounded-lg bg-rose-subtle flex items-center justify-center text-sm">⚠️</span>
+              <span className="w-7 h-7 rounded-lg bg-rose-subtle text-rose flex items-center justify-center"><IconAlert size={15} /></span>
               Things to Avoid
             </h3>
             <ul className="space-y-3">
               {itinerary.avoidList.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm">
-                  <span className="text-rose shrink-0 mt-0.5 font-bold">✗</span>
+                  <IconX size={14} className="text-rose mt-0.5" />
                   <span className="text-ink-soft leading-relaxed">{item}</span>
                 </li>
               ))}
@@ -619,13 +638,13 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
         {itinerary.mustTry?.length > 0 && (
           <div className="bg-white border border-line rounded-2xl p-5 shadow-warm-sm">
             <h3 className="font-semibold text-ink mb-4 flex items-center gap-2 text-sm">
-              <span className="w-7 h-7 rounded-lg bg-marigold-subtle flex items-center justify-center text-sm">⭐</span>
+              <span className="w-7 h-7 rounded-lg bg-marigold-subtle text-marigold-deep flex items-center justify-center"><IconStar size={15} /></span>
               Must Try
             </h3>
             <div className="space-y-2.5">
               {itinerary.mustTry.map((item, i) => (
                 <div key={i} className="flex items-start gap-3 text-sm p-2.5 rounded-xl bg-paper-warm border border-line">
-                  <span className="text-marigold shrink-0 font-bold">★</span>
+                  <IconStar size={14} filled className="text-marigold mt-0.5" />
                   <span className="text-ink-soft leading-relaxed">{item}</span>
                 </div>
               ))}
@@ -636,7 +655,7 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
         {itinerary.localPhrases?.length > 0 && (
           <div className="bg-white border border-line rounded-2xl p-5 shadow-warm-sm">
             <h3 className="font-semibold text-ink mb-4 flex items-center gap-2 text-sm">
-              <span className="w-7 h-7 rounded-lg bg-jade-subtle flex items-center justify-center text-sm">🗣️</span>
+              <span className="w-7 h-7 rounded-lg bg-jade-subtle text-jade-deep flex items-center justify-center"><IconChat size={15} /></span>
               Useful Phrases
             </h3>
             <div className="space-y-2">

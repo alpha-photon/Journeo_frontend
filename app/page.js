@@ -16,6 +16,7 @@ import TravelEssentials from './components/TravelEssentials';
 import PackingList from './components/PackingList';
 import PDFExport from './components/PDFExport';
 import BudgetTracker from './components/BudgetTracker';
+import { IconMapPin, IconLink } from './components/icons';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003';
 
@@ -221,7 +222,7 @@ export default function Home() {
           <div className="animate-fade-in">
 
             {/* ── Hero ── */}
-            <section className="relative overflow-hidden px-4 pt-16 pb-14 sm:pt-28 sm:pb-20">
+            <section className="relative overflow-hidden px-4 pt-10 pb-10 sm:pt-14 sm:pb-12">
               {/* Warm background wash */}
               <div className="absolute inset-0 bg-gradient-to-b from-saffron-subtle via-paper to-paper pointer-events-none" />
               {/* Decorative blobs */}
@@ -230,13 +231,13 @@ export default function Home() {
 
               <div className="relative max-w-3xl mx-auto text-center">
                 {/* Badge */}
-                <div className="animate-slide-down inline-flex items-center gap-2 px-4 py-1.5 bg-saffron-subtle border border-saffron-light rounded-full text-saffron-deep text-xs font-mono mb-8 tracking-wider uppercase">
+                <div className="animate-slide-down inline-flex items-center gap-2 px-4 py-1.5 bg-saffron-subtle border border-saffron-light rounded-full text-saffron-deep text-xs font-mono mb-5 tracking-wider uppercase">
                   <span className="w-1.5 h-1.5 bg-saffron rounded-full animate-pulse-soft" />
                   Free · No sign-up required
                 </div>
 
                 {/* Headline — serif editorial style */}
-                <h1 className="font-serif text-[2.8rem] sm:text-[4.5rem] font-semibold mb-5 leading-[1.05] tracking-tight text-ink">
+                <h1 className="font-serif text-[2.5rem] sm:text-[3.5rem] font-semibold mb-4 leading-[1.05] tracking-tight text-ink">
                   Plan less.{' '}
                   <em className="text-saffron not-italic">Wander</em>
                   <br className="hidden sm:block" />
@@ -244,13 +245,13 @@ export default function Home() {
                 </h1>
 
                 {/* Sub-headline */}
-                <p className="text-base sm:text-lg text-ink-muted mb-6 max-w-xl mx-auto leading-relaxed font-sans">
+                <p className="text-base sm:text-lg text-ink-muted mb-5 max-w-xl mx-auto leading-relaxed font-sans">
                   Tell us where you're going. Get a complete, day-by-day itinerary built from{' '}
                   <span className="text-ink font-medium">real traveler data</span> — instantly.
                 </p>
 
                 {/* Trust pills */}
-                <div className="flex items-center justify-center gap-2 flex-wrap mb-10">
+                <div className="flex items-center justify-center gap-2 flex-wrap mb-8">
                   {['Reddit insights', 'Packing list', 'Ask Maya AI', 'Group trips'].map((t) => (
                     <span key={t} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-line rounded-full text-xs text-ink-muted font-sans shadow-warm-sm">
                       <span className="w-1.5 h-1.5 bg-saffron rounded-full" />
@@ -265,10 +266,7 @@ export default function Home() {
                 {/* Sample destinations */}
                 <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
                   <span className="text-xs text-ink-muted font-mono tracking-wider">POPULAR:</span>
-                  {[
-                    { e: '🗼', d: 'Paris' }, { e: '🏝️', d: 'Bali' }, { e: '⛩️', d: 'Tokyo' },
-                    { e: '🏔️', d: 'Manali' }, { e: '🏛️', d: 'Rome' }, { e: '🌆', d: 'Udaipur' },
-                  ].map(({ e, d }) => (
+                  {['Paris', 'Bali', 'Tokyo', 'Manali', 'Rome', 'Udaipur'].map((d) => (
                     <button
                       key={d}
                       onClick={() => {
@@ -282,7 +280,7 @@ export default function Home() {
                       }}
                       className="text-xs px-3 py-1.5 rounded-full bg-white border border-line text-ink-muted hover:border-saffron/50 hover:text-saffron-deep hover:bg-saffron-subtle transition-all duration-200 shadow-warm-sm"
                     >
-                      {e} {d}
+                      <IconMapPin size={12} className="mr-1 -mt-px text-ink-muted" />{d}
                     </button>
                   ))}
                 </div>
@@ -491,7 +489,7 @@ export default function Home() {
                           : 'bg-white/10 text-paper/70 border-white/20 hover:text-paper hover:border-white/40'
                       }`}
                     >
-                      {copied ? <IconCheck size={12} /> : '🔗'}
+                      {copied ? <IconCheck size={12} /> : <IconLink size={12} />}
                       <span>{copied ? 'Copied!' : 'Copy share link'}</span>
                     </button>
                   )}
@@ -511,8 +509,9 @@ export default function Home() {
                   <p className="text-paper/70 text-sm leading-relaxed max-w-3xl mt-4 mb-6 font-sans">{itinerary.overview}</p>
                 )}
 
-                {/* Stats pills */}
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {/* Stats — even grid rather than content-sized pills, which
+                    wrapped raggedly and truncated every long value. */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                   {[
                     { label: 'Duration',  value: `${itinerary.totalDays} Days` },
                     itinerary.bestTimeToVisit && { label: 'Best Time', value: itinerary.bestTimeToVisit.replace(/^The best time to visit [^,.]+ is /, '').split('.')[0] },
@@ -521,11 +520,9 @@ export default function Home() {
                     itinerary.timezone && { label: 'Timezone', value: itinerary.timezone },
                     itinerary.visaInfo  && { label: 'Visa',     value: itinerary.visaInfo.split('.')[0] },
                   ].filter(Boolean).map((s) => (
-                    <div key={s.label} className="shrink-0 bg-white/10 border border-white/15 rounded-xl px-4 py-2.5 flex items-center gap-2.5 backdrop-blur-sm">
-                      <div>
-                        <p className="text-[10px] text-paper/50 leading-none mb-0.5 font-mono tracking-wider uppercase">{s.label}</p>
-                        <p className="text-sm font-semibold text-paper leading-none whitespace-nowrap max-w-[180px] truncate font-sans">{s.value}</p>
-                      </div>
+                    <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl px-3 py-2.5 backdrop-blur-sm min-w-0">
+                      <p className="text-[10px] text-paper/50 mb-1 font-mono tracking-wider uppercase truncate">{s.label}</p>
+                      <p className="text-sm font-semibold text-paper leading-snug line-clamp-2 font-sans">{s.value}</p>
                     </div>
                   ))}
                 </div>
