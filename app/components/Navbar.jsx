@@ -12,6 +12,7 @@ export default function Navbar({ onAuthClick, rightContent }) {
   const passportEnabled = useFlag('passport_page');
   const buddyEnabled    = useFlag('travel_buddy');
   const exploreEnabled  = useFlag('explore_page');
+  const paymentsEnabled = useFlag('payments_enabled');
 
   const navLinks = [
     ...(exploreEnabled  ? [{ href: '/explore',      label: 'Explore' }]       : []),
@@ -134,16 +135,18 @@ export default function Navbar({ onAuthClick, rightContent }) {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-ink truncate max-w-[200px]">{user.email}</p>
-                        <p className="text-[11px] text-ink-muted">View profile & subscription</p>
+                        <p className="text-[11px] text-ink-muted">{paymentsEnabled ? 'View profile & subscription' : 'View profile'}</p>
                       </div>
                     </Link>
-                    <Link
-                      href="/pricing"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center px-3 py-2.5 rounded-xl text-sm text-ink-soft hover:text-ink hover:bg-paper-warm transition-all"
-                    >
-                      ★ Pricing & Pro
-                    </Link>
+                    {paymentsEnabled && (
+                      <Link
+                        href="/pricing"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center px-3 py-2.5 rounded-xl text-sm text-ink-soft hover:text-ink hover:bg-paper-warm transition-all"
+                      >
+                        ★ Pricing & Pro
+                      </Link>
+                    )}
                     <button
                       onClick={() => { logout(); setMenuOpen(false); }}
                       className="w-full text-left px-3 py-2.5 rounded-xl text-sm text-ink-muted hover:text-rose hover:bg-rose-subtle transition-all"

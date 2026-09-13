@@ -112,7 +112,7 @@ export default function PricingPage() {
                 Active until {new Date(periodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
             )}
-            <Link href="/account" className="inline-block mt-2 text-xs text-saffron hover:text-saffron-deep">
+            <Link href="/profile" className="inline-block mt-2 text-xs text-saffron hover:text-saffron-deep">
               Manage subscription →
             </Link>
           </div>
