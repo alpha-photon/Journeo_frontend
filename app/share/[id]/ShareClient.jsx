@@ -13,6 +13,7 @@ import TravelBuddyPanel from '../../components/TravelBuddyPanel';
 import PackingList from '../../components/PackingList';
 import BudgetTracker from '../../components/BudgetTracker';
 import RedditInsights from '../../components/RedditInsights';
+import TripJournal from '../../components/TripJournal';
 import AuthModal from '../../components/AuthModal';
 import { useAuth } from '../../context/AuthContext';
 import { useFlag, useFlagOrder } from '../../context/FeatureFlagContext';
@@ -33,6 +34,7 @@ export default function ShareClient({ shareId }) {
   const packingEnabled      = useFlag('packing_list');
   const resourcesEnabled    = useFlag('resources_tab');
   const chatEnabled         = useFlag('ai_chat');
+  const journalEnabled      = useFlag('trip_journal');
 
   // Sequence comes from each flag's `order` in the backoffice — not hardcoded.
   const itineraryOrder  = useFlagOrder('itinerary_tab');
@@ -44,6 +46,7 @@ export default function ShareClient({ shareId }) {
   const chatOrder       = useFlagOrder('ai_chat');
   const groupChatOrder  = useFlagOrder('group_chat');
   const buddyOrder      = useFlagOrder('travel_buddy');
+  const journalOrder    = useFlagOrder('trip_journal');
 
   const [data, setData]           = useState(null);
   const [loading, setLoading]     = useState(true);
@@ -151,6 +154,8 @@ export default function ShareClient({ shareId }) {
     ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya',    order: chatOrder }] : []),
     ...(collabEnabled && collaboration && groupChatEnabled ? [{ id: 'group-chat',   label: 'Group Chat',   live: true, order: groupChatOrder }] : []),
     ...(buddyEnabled ? [{ id: 'travel-buddy', label: 'Travel Buddy', live: true, order: buddyOrder }] : []),
+    // Journal is private — only the owner ever sees this tab.
+    ...(journalEnabled !== false && saveStatus === 'owned' ? [{ id: 'journal', label: 'Journal', order: journalOrder }] : []),
   ].sort((a, b) => a.order - b.order);
 
   // If the active tab gets hidden by a flag (or defaults to one that's off),
@@ -324,6 +329,17 @@ export default function ShareClient({ shareId }) {
         {activeTab === 'chat'         && chatEnabled !== false && <ChatAgent itinerary={itinerary} destination={destination} shareId={shareId} />}
         {activeTab === 'group-chat'   && <TripChat shareId={shareId} collaboration={collaboration} />}
         {activeTab === 'travel-buddy' && buddyEnabled && <TravelBuddyPanel shareId={shareId} totalDays={data?.itinerary?.totalDays || 1} isOwner={saveStatus === 'owned'} />}
+        {activeTab === 'journal' && journalEnabled !== false && saveStatus === 'owned' && (
+          <TripJournal
+            shareId={shareId}
+            itinerary={itinerary}
+            destination={destination}
+            startDate={data?.startDate}
+            completed={data?.completed}
+            journal={data?.journal}
+            onUpdate={(patch) => setData((prev) => ({ ...prev, ...patch }))}
+          />
+        )}
       </div>
 
       <footer className="border-t border-line py-6 px-4 text-center bg-white">

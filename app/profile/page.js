@@ -27,6 +27,38 @@ function daysLeft(d) {
   return Math.ceil(diff / 86_400_000);
 }
 
+function tripWindowPassed(startDate, days) {
+  if (!startDate) return false;
+  const end = new Date(startDate);
+  end.setDate(end.getDate() + (days || 1));
+  return end < new Date();
+}
+
+function JournalBadge({ trip }) {
+  if (trip.journal?.story) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-jade-subtle text-jade-deep border border-jade-light">
+        📖 Journal written{trip.journal.rating ? ` · ${'★'.repeat(trip.journal.rating)}` : ''}
+      </span>
+    );
+  }
+  if (trip.completed) {
+    return (
+      <span className="text-[11px] px-2 py-0.5 rounded-full bg-line text-ink-muted border border-line">
+        Add your story
+      </span>
+    );
+  }
+  if (tripWindowPassed(trip.startDate, trip.days)) {
+    return (
+      <span className="text-[11px] px-2 py-0.5 rounded-full bg-saffron-subtle text-saffron-deep border border-saffron-light font-medium">
+        How was it? →
+      </span>
+    );
+  }
+  return null;
+}
+
 const PERSONALITIES = {
   budget:    { title: 'The Backpacker',       emoji: '🎒', blurb: 'You chase real value and real experiences over luxury.' },
   luxury:    { title: 'The Jetsetter',        emoji: '✨', blurb: 'You travel in style — comfort is never optional.' },
@@ -231,6 +263,9 @@ export default function ProfilePage() {
                         <p className="text-xs text-ink-muted mt-0.5">
                           {t.days} day{t.days !== 1 ? 's' : ''} · {t.travelStyle || 'balanced'} · {fmtDate(t.createdAt)}
                         </p>
+                        <div className="mt-1.5">
+                          <JournalBadge trip={t} />
+                        </div>
                       </div>
                       <span className="text-ink-muted text-sm shrink-0 ml-3">→</span>
                     </Link>
