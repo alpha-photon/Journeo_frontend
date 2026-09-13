@@ -127,6 +127,29 @@ export default function ShareClient({ shareId }) {
     setSaving(false);
   };
 
+  // Tabs depend only on flags/activeTab/collaboration (all available before the
+  // early returns below) — kept up here so this hook always runs, regardless
+  // of loading/error state. Hooks must never be conditional on those returns.
+  const tabs = [
+    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary'   }] : []),
+    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials'  }] : []),
+    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List' }] : []),
+    ...(budgetEnabled ? [{ id: 'budget',       label: 'Budget'       }] : []),
+    ...(redditEnabled ? [{ id: 'reddit',       label: 'Reddit'       }] : []),
+    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources'   }] : []),
+    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya'    }] : []),
+    ...(collabEnabled && collaboration && groupChatEnabled ? [{ id: 'group-chat',   label: 'Group Chat',   live: true }] : []),
+    ...(buddyEnabled ? [{ id: 'travel-buddy', label: 'Travel Buddy', live: true }] : []),
+  ];
+
+  // If the active tab gets hidden by a flag (or defaults to one that's off),
+  // fall back to the first tab that's actually visible.
+  useEffect(() => {
+    if (tabs.length && !tabs.some((t) => t.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs.map((t) => t.id).join(',')]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-paper">
@@ -178,26 +201,6 @@ export default function ShareClient({ shareId }) {
   const views       = data?.views || 0;
 
   const isSaved = saveStatus === 'saved';
-
-  const tabs = [
-    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary'   }] : []),
-    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials'  }] : []),
-    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List' }] : []),
-    ...(budgetEnabled ? [{ id: 'budget',       label: 'Budget'       }] : []),
-    ...(redditEnabled ? [{ id: 'reddit',       label: 'Reddit'       }] : []),
-    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources'   }] : []),
-    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya'    }] : []),
-    ...(collabEnabled && collaboration && groupChatEnabled ? [{ id: 'group-chat',   label: 'Group Chat',   live: true }] : []),
-    ...(buddyEnabled ? [{ id: 'travel-buddy', label: 'Travel Buddy', live: true }] : []),
-  ];
-
-  // If the active tab gets hidden by a flag (or defaults to one that's off),
-  // fall back to the first tab that's actually visible.
-  useEffect(() => {
-    if (tabs.length && !tabs.some((t) => t.id === activeTab)) {
-      setActiveTab(tabs[0].id);
-    }
-  }, [tabs.map((t) => t.id).join(',')]);
 
   return (
     <div className="min-h-screen bg-paper">
