@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
+import { useFlag } from '../context/FeatureFlagContext';
 import { useSubscription } from '../../hooks/useSubscription';
 import { getToken, withAuth } from '../../lib/auth';
 import AuthModal from '../components/AuthModal';
@@ -32,6 +33,7 @@ export default function ProfilePage() {
     isPro, isFree, plan, status, periodEnd, cancelAtEnd, manualOverride,
     usage, loading: subLoading, refresh,
   } = useSubscription();
+  const paymentsEnabled = useFlag('payments_enabled');
 
   const [authModal, setAuthModal]     = useState(null);
   const [payments, setPayments]       = useState([]);
@@ -153,6 +155,9 @@ export default function ProfilePage() {
               </button>
             </div>
 
+            {/* ── Subscription / billing UI — hidden entirely while payments are off ── */}
+            {paymentsEnabled && (
+            <>
             {/* ── Subscription status card ──────────────────────────────────── */}
             <div className={`border rounded-2xl overflow-hidden ${isPro ? 'border-marigold/30 bg-marigold/5' : 'border-line bg-paper-warm'}`}>
               <div className="px-5 py-4 flex items-center justify-between border-b border-line/60">
@@ -355,6 +360,8 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+            </>
+            )}
 
           </div>
         )}
