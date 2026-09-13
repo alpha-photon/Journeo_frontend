@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from './context/AuthContext';
-import { useFlag } from './context/FeatureFlagContext';
+import { useFlag, useFlagOrder } from './context/FeatureFlagContext';
 import AuthModal from './components/AuthModal';
 import { withAuth } from '../lib/auth';
 import Navbar from './components/Navbar';
@@ -65,15 +65,24 @@ export default function Home() {
   const resourcesEnabled = useFlag('resources_tab');
   const chatEnabled = useFlag('ai_chat');
 
+  // Sequence comes from each flag's `order` in the backoffice — not hardcoded.
+  const itineraryOrder = useFlagOrder('itinerary_tab');
+  const essentialsOrder = useFlagOrder('travel_essentials');
+  const packingOrder = useFlagOrder('packing_list');
+  const budgetOrder = useFlagOrder('budget_planner');
+  const redditOrder = useFlagOrder('reddit_insights');
+  const resourcesOrder = useFlagOrder('resources_tab');
+  const chatOrder = useFlagOrder('ai_chat');
+
   const TABS = [
-    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary'  }] : []),
-    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials' }] : []),
-    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List' }] : []),
-    ...(budgetEnabled ? [{ id: 'budget',  label: 'Budget' }] : []),
-    ...(redditEnabled ? [{ id: 'reddit',  label: 'Reddit Insights' }] : []),
-    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources' }] : []),
-    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya' }] : []),
-  ];
+    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary',  order: itineraryOrder }] : []),
+    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials', order: essentialsOrder }] : []),
+    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List', order: packingOrder }] : []),
+    ...(budgetEnabled ? [{ id: 'budget',  label: 'Budget', order: budgetOrder }] : []),
+    ...(redditEnabled ? [{ id: 'reddit',  label: 'Reddit Insights', order: redditOrder }] : []),
+    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources', order: resourcesOrder }] : []),
+    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya', order: chatOrder }] : []),
+  ].sort((a, b) => a.order - b.order);
 
   // Whichever tab is first in the (flag-filtered) list — used whenever we need
   // to land on "the default tab" without assuming 'itinerary' is enabled.

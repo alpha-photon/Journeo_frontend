@@ -35,3 +35,11 @@ export function useFlag(key) {
   if (!loaded) return null;
   return flags[key]?.enabled === true;
 }
+
+// Display/tab sequence for a flag — lower shows first. Falls back to a large
+// number so flags without an order (or still loading) sort last, not first.
+export function useFlagOrder(key) {
+  const { flags } = useFeatureFlags();
+  const order = flags[key]?.order;
+  return typeof order === 'number' ? order : 999;
+}

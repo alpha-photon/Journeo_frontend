@@ -15,7 +15,7 @@ import BudgetTracker from '../../components/BudgetTracker';
 import RedditInsights from '../../components/RedditInsights';
 import AuthModal from '../../components/AuthModal';
 import { useAuth } from '../../context/AuthContext';
-import { useFlag } from '../../context/FeatureFlagContext';
+import { useFlag, useFlagOrder } from '../../context/FeatureFlagContext';
 import { withAuth } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5003';
@@ -33,6 +33,17 @@ export default function ShareClient({ shareId }) {
   const packingEnabled      = useFlag('packing_list');
   const resourcesEnabled    = useFlag('resources_tab');
   const chatEnabled         = useFlag('ai_chat');
+
+  // Sequence comes from each flag's `order` in the backoffice — not hardcoded.
+  const itineraryOrder  = useFlagOrder('itinerary_tab');
+  const essentialsOrder = useFlagOrder('travel_essentials');
+  const packingOrder    = useFlagOrder('packing_list');
+  const budgetOrder     = useFlagOrder('budget_planner');
+  const redditOrder     = useFlagOrder('reddit_insights');
+  const resourcesOrder  = useFlagOrder('resources_tab');
+  const chatOrder       = useFlagOrder('ai_chat');
+  const groupChatOrder  = useFlagOrder('group_chat');
+  const buddyOrder      = useFlagOrder('travel_buddy');
 
   const [data, setData]           = useState(null);
   const [loading, setLoading]     = useState(true);
@@ -131,16 +142,16 @@ export default function ShareClient({ shareId }) {
   // early returns below) — kept up here so this hook always runs, regardless
   // of loading/error state. Hooks must never be conditional on those returns.
   const tabs = [
-    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary'   }] : []),
-    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials'  }] : []),
-    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List' }] : []),
-    ...(budgetEnabled ? [{ id: 'budget',       label: 'Budget'       }] : []),
-    ...(redditEnabled ? [{ id: 'reddit',       label: 'Reddit'       }] : []),
-    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources'   }] : []),
-    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya'    }] : []),
-    ...(collabEnabled && collaboration && groupChatEnabled ? [{ id: 'group-chat',   label: 'Group Chat',   live: true }] : []),
-    ...(buddyEnabled ? [{ id: 'travel-buddy', label: 'Travel Buddy', live: true }] : []),
-  ];
+    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary',   order: itineraryOrder }] : []),
+    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials',  order: essentialsOrder }] : []),
+    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List', order: packingOrder }] : []),
+    ...(budgetEnabled ? [{ id: 'budget',       label: 'Budget',       order: budgetOrder }] : []),
+    ...(redditEnabled ? [{ id: 'reddit',       label: 'Reddit',       order: redditOrder }] : []),
+    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources',   order: resourcesOrder }] : []),
+    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya',    order: chatOrder }] : []),
+    ...(collabEnabled && collaboration && groupChatEnabled ? [{ id: 'group-chat',   label: 'Group Chat',   live: true, order: groupChatOrder }] : []),
+    ...(buddyEnabled ? [{ id: 'travel-buddy', label: 'Travel Buddy', live: true, order: buddyOrder }] : []),
+  ].sort((a, b) => a.order - b.order);
 
   // If the active tab gets hidden by a flag (or defaults to one that's off),
   // fall back to the first tab that's actually visible.
