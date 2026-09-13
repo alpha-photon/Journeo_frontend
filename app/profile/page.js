@@ -27,6 +27,15 @@ function daysLeft(d) {
   return Math.ceil(diff / 86_400_000);
 }
 
+const PERSONALITIES = {
+  budget:    { title: 'The Backpacker',       emoji: '🎒', blurb: 'You chase real value and real experiences over luxury.' },
+  luxury:    { title: 'The Jetsetter',        emoji: '✨', blurb: 'You travel in style — comfort is never optional.' },
+  adventure: { title: 'The Thrill Seeker',    emoji: '🏔️', blurb: 'Trails, peaks, and adrenaline call your name.' },
+  family:    { title: 'The Family Explorer',  emoji: '👨‍👩‍👧', blurb: 'Every trip is a memory made together.' },
+  romantic:  { title: 'The Romantic Wanderer',emoji: '🌅', blurb: 'Sunsets and slow mornings, always.' },
+  balanced:  { title: 'The All-Rounder',      emoji: '🧭', blurb: 'A bit of everything — your favorite way to travel.' },
+};
+
 export default function ProfilePage() {
   const { user, loading: authLoading, logout } = useAuth();
   const {
@@ -38,7 +47,8 @@ export default function ProfilePage() {
   const [authModal, setAuthModal]     = useState(null);
   const [payments, setPayments]       = useState([]);
   const [paymentsLoaded, setPaymentsLoaded] = useState(false);
-  const [stats, setStats]             = useState(null);
+  const [trips, setTrips]             = useState([]);
+  const [tripsLoaded, setTripsLoaded] = useState(false);
 
   // Cancellation
   const [cancelling, setCancelling]       = useState(false);
@@ -59,14 +69,23 @@ export default function ProfilePage() {
       .catch(() => {})
       .finally(() => setPaymentsLoaded(true));
 
-    // Load trip count
+    // Load trips — powers both the trip count and the Travel DNA stats below
     fetch(`${API_URL}/api/itinerary/my-trips`, withAuth())
       .then((r) => r.json())
-      .then((d) => {
-        if (d.success) setStats({ tripCount: d.itineraries?.length || 0 });
-      })
-      .catch(() => {});
+      .then((d) => { if (d.success) setTrips(d.itineraries || []); })
+      .catch(() => {})
+      .finally(() => setTripsLoaded(true));
   }, [user]);
+
+  const ownedTrips = trips.filter((t) => t.isOwner);
+  const totalDays = ownedTrips.reduce((sum, t) => sum + (t.days || 0), 0);
+  const countries = [...new Set(ownedTrips.map((t) => t.itinerary?.country).filter(Boolean))];
+  const styleCounts = ownedTrips.reduce((acc, t) => {
+    if (t.travelStyle) acc[t.travelStyle] = (acc[t.travelStyle] || 0) + 1;
+    return acc;
+  }, {});
+  const favoriteStyle = Object.entries(styleCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+  const personality = favoriteStyle && PERSONALITIES[favoriteStyle];
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -130,7 +149,7 @@ export default function ProfilePage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-lg font-bold text-ink truncate">{user.email}</h1>
-                  {isPro ? (
+                  {paymentsEnabled && (isPro ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-marigold/15 border border-marigold/30 text-marigold-deep">
                       ★ Pro
                     </span>
@@ -138,13 +157,13 @@ export default function ProfilePage() {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-line border border-line text-ink-muted">
                       Free
                     </span>
-                  )}
-                  {manualOverride && (
+                  ))}
+                  {paymentsEnabled && manualOverride && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo/10 border border-indigo/20 text-indigo-deep">admin</span>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-4 mt-2 text-xs text-ink-muted">
-                  {stats && <span>{stats.tripCount} trip{stats.tripCount !== 1 ? 's' : ''} generated</span>}
+                  {tripsLoaded && <span>{ownedTrips.length} trip{ownedTrips.length !== 1 ? 's' : ''} generated</span>}
                 </div>
               </div>
               <button
@@ -154,6 +173,71 @@ export default function ProfilePage() {
                 Sign out
               </button>
             </div>
+
+            {/* ── Travel DNA — a personality read on their trips, computed client-side ── */}
+            {tripsLoaded && ownedTrips.length > 0 && (
+              <div className="border border-line rounded-2xl p-6 bg-gradient-to-br from-saffron-subtle to-paper-warm">
+                <p className="text-[11px] font-mono tracking-wider uppercase text-saffron-deep mb-2">Your Travel DNA</p>
+                <div className="flex items-center gap-3 mb-1">
+                  <span className="text-3xl">{personality?.emoji || '🧭'}</span>
+                  <h2 className="font-serif text-xl font-semibold text-ink">{personality?.title || 'The Explorer'}</h2>
+                </div>
+                <p className="text-sm text-ink-muted mb-5">{personality?.blurb || 'Every trip tells a story.'}</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/70 rounded-xl p-3 text-center border border-line/60">
+                    <p className="text-2xl font-bold text-ink">{ownedTrips.length}</p>
+                    <p className="text-[11px] text-ink-muted mt-0.5">Trips Planned</p>
+                  </div>
+                  <div className="bg-white/70 rounded-xl p-3 text-center border border-line/60">
+                    <p className="text-2xl font-bold text-ink">{totalDays}</p>
+                    <p className="text-[11px] text-ink-muted mt-0.5">Days Mapped</p>
+                  </div>
+                  <div className="bg-white/70 rounded-xl p-3 text-center border border-line/60">
+                    <p className="text-2xl font-bold text-ink">{countries.length}</p>
+                    <p className="text-[11px] text-ink-muted mt-0.5">{countries.length === 1 ? 'Country' : 'Countries'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Empty state — no trips generated yet ──────────────────────── */}
+            {tripsLoaded && ownedTrips.length === 0 && (
+              <div className="border border-dashed border-line rounded-2xl p-8 text-center bg-paper-warm">
+                <div className="text-3xl mb-2">🗺️</div>
+                <h2 className="font-serif text-lg font-semibold text-ink mb-1">No trips yet</h2>
+                <p className="text-sm text-ink-muted mb-4">Plan your first trip and your Travel DNA will show up here.</p>
+                <Link href="/" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-ink hover:bg-ink-soft text-paper text-sm font-semibold transition-colors">
+                  + Plan a Trip
+                </Link>
+              </div>
+            )}
+
+            {/* ── Recent trips ──────────────────────────────────────────────── */}
+            {ownedTrips.length > 0 && (
+              <div className="border border-line rounded-2xl overflow-hidden bg-paper-warm">
+                <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-ink">Recent Trips</h2>
+                  <Link href="/my-trips" className="text-xs text-saffron hover:text-saffron-deep font-medium">View all →</Link>
+                </div>
+                <div className="divide-y divide-line/60">
+                  {ownedTrips.slice(0, 5).map((t) => (
+                    <Link
+                      key={t.shareId}
+                      href={`/share/${t.shareId}`}
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-line/30 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-ink truncate">{t.destination}</p>
+                        <p className="text-xs text-ink-muted mt-0.5">
+                          {t.days} day{t.days !== 1 ? 's' : ''} · {t.travelStyle || 'balanced'} · {fmtDate(t.createdAt)}
+                        </p>
+                      </div>
+                      <span className="text-ink-muted text-sm shrink-0 ml-3">→</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Subscription / billing UI — hidden entirely while payments are off ── */}
             {paymentsEnabled && (
