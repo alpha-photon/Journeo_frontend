@@ -138,11 +138,16 @@ What would you like to know?`,
       const reader  = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let lineBuffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const lines = decoder.decode(value, { stream: true }).split('\n');
+        lineBuffer += decoder.decode(value, { stream: true });
+        // SSE events can be split across network chunks — only process
+        // complete lines, keep any trailing partial line for the next read.
+        const lines = lineBuffer.split('\n');
+        lineBuffer = lines.pop();
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const dataStr = line.slice(6).trim();
