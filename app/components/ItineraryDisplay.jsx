@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import ActivityVotes from './ActivityVotes';
 import ActivityComments from './ActivityComments';
 import ActivitySuggestions from './ActivitySuggestions';
+import ItineraryRefine from './ItineraryRefine';
 
 const TripMap = dynamic(() => import('./TripMap'), { ssr: false });
 
@@ -453,6 +454,9 @@ export default function ItineraryDisplay({ itinerary, shareId, destination, trav
 
   return (
     <div className="animate-fade-in">
+
+      {/* Refine from feedback — owner-only, regenerates the whole trip */}
+      {canEdit && shareId && <ItineraryRefine shareId={shareId} />}
 
       {/* Getting Around Banner */}
       {itinerary.gettingAround && (
