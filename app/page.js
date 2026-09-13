@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from './context/AuthContext';
 import { useFlag } from './context/FeatureFlagContext';
@@ -59,16 +59,33 @@ export default function Home() {
   const budgetEnabled = useFlag('budget_planner');
   const redditEnabled = useFlag('reddit_insights');
   const mapsEnabled = useFlag('google_maps');
+  const itineraryTabEnabled = useFlag('itinerary_tab');
+  const essentialsEnabled = useFlag('travel_essentials');
+  const packingEnabled = useFlag('packing_list');
+  const resourcesEnabled = useFlag('resources_tab');
+  const chatEnabled = useFlag('ai_chat');
 
   const TABS = [
-    { id: 'itinerary',  label: 'Itinerary'  },
-    { id: 'essentials', label: 'Essentials' },
-    { id: 'packing',    label: 'Packing List' },
+    ...(itineraryTabEnabled !== false ? [{ id: 'itinerary',  label: 'Itinerary'  }] : []),
+    ...(essentialsEnabled !== false ? [{ id: 'essentials', label: 'Essentials' }] : []),
+    ...(packingEnabled !== false ? [{ id: 'packing',    label: 'Packing List' }] : []),
     ...(budgetEnabled ? [{ id: 'budget',  label: 'Budget' }] : []),
     ...(redditEnabled ? [{ id: 'reddit',  label: 'Reddit Insights' }] : []),
-    { id: 'resources',  label: 'Resources' },
-    { id: 'chat',       label: 'Ask Maya' },
+    ...(resourcesEnabled !== false ? [{ id: 'resources',  label: 'Resources' }] : []),
+    ...(chatEnabled !== false ? [{ id: 'chat',       label: 'Ask Maya' }] : []),
   ];
+
+  // Whichever tab is first in the (flag-filtered) list — used whenever we need
+  // to land on "the default tab" without assuming 'itinerary' is enabled.
+  const defaultTabId = TABS[0]?.id || 'itinerary';
+
+  // If the active tab gets hidden by a flag (or defaults to one that's off),
+  // fall back to the first tab that's actually visible.
+  useEffect(() => {
+    if (TABS.length && !TABS.some((t) => t.id === activeTab)) {
+      setActiveTab(TABS[0].id);
+    }
+  }, [TABS.map((t) => t.id).join(',')]);
 
   const markStep = (stepId, status, message) =>
     setLoadingSteps((prev) =>
@@ -118,7 +135,7 @@ export default function Home() {
             setShareId(evt.shareId);
             if (effectiveUserId)
               fetch(`${API_URL}/api/passport/${effectiveUserId}/ping`, { method: 'POST' }).catch(() => {});
-            setTimeout(() => { setStage('results'); setActiveTab('itinerary'); }, 600);
+            setTimeout(() => { setStage('results'); setActiveTab(defaultTabId); }, 600);
           } else if (evt.type === 'error') {
             const msg = evt.message?.includes('rate_limit') || evt.message?.includes('429')
               ? 'Our AI is a bit busy right now. Please wait a minute and try again.'
@@ -137,7 +154,7 @@ export default function Home() {
 
   const handleReset = () => {
     setStage('form'); setItinerary(null); setDestination('');
-    setShareId(null); setFormData(null); setActiveTab('itinerary');
+    setShareId(null); setFormData(null); setActiveTab(defaultTabId);
   };
 
   const handleCopyShare = async () => {
@@ -540,13 +557,13 @@ export default function Home() {
 
             {/* Tab Content */}
             <div className="max-w-7xl mx-auto px-4 py-8">
-              {activeTab === 'itinerary'  && <ItineraryDisplay itinerary={itinerary} shareId={shareId} destination={destination} travelStyle={formData?.travelStyle} canEdit mapsEnabled={mapsEnabled} />}
-              {activeTab === 'essentials' && <TravelEssentials destination={destination} shareId={shareId} />}
-              {activeTab === 'packing'    && <PackingList destination={destination} days={itinerary.totalDays} travelStyle={formData?.travelStyle} shareId={shareId} />}
+              {activeTab === 'itinerary'  && itineraryTabEnabled !== false && <ItineraryDisplay itinerary={itinerary} shareId={shareId} destination={destination} travelStyle={formData?.travelStyle} canEdit mapsEnabled={mapsEnabled} />}
+              {activeTab === 'essentials' && essentialsEnabled !== false && <TravelEssentials destination={destination} shareId={shareId} />}
+              {activeTab === 'packing'    && packingEnabled !== false && <PackingList destination={destination} days={itinerary.totalDays} travelStyle={formData?.travelStyle} shareId={shareId} />}
               {activeTab === 'budget'     && <BudgetTracker shareId={shareId} destination={destination} numDays={itinerary.totalDays} suggestedBudgetPerDay={formData?.budgetPerDay ? parseFloat(formData.budgetPerDay) : null} />}
               {activeTab === 'reddit'     && <RedditInsights destination={destination} />}
-              {activeTab === 'resources'  && <WebRecommendations destination={destination} />}
-              {activeTab === 'chat'       && <ChatAgent itinerary={itinerary} destination={destination} shareId={shareId} />}
+              {activeTab === 'resources'  && resourcesEnabled !== false && <WebRecommendations destination={destination} />}
+              {activeTab === 'chat'       && chatEnabled !== false && <ChatAgent itinerary={itinerary} destination={destination} shareId={shareId} />}
             </div>
           </div>
         )}
