@@ -32,9 +32,10 @@ export default function Navbar({ onAuthClick, rightContent }) {
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-xl bg-ink flex items-center justify-center shadow-warm-sm group-hover:bg-ink-soft transition-colors">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="2.5" fill="#F97316" />
-                <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2" stroke="#FAF6EE" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M3.6 3.6l1.4 1.4M11 11l1.4 1.4M11 3.6l-1.4 1.4M5 11l-1.4 1.4" stroke="#FAF6EE" strokeWidth="1.2" strokeLinecap="round"/>
+                <path d="M4.7 11.6 11.3 4.4" stroke="#FAF6EE" strokeWidth="0.45" strokeLinecap="round" opacity="0.9"/>
+                <circle cx="4.7" cy="11.6" r="0.95" fill="#FAF6EE" />
+                <circle cx="8" cy="8" r="1.2" fill="#FAF6EE" />
+                <circle cx="11.3" cy="4.4" r="1.5" fill="#F97316" />
               </svg>
             </div>
             <div>
