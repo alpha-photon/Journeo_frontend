@@ -29,9 +29,11 @@ export default function TripChat({ shareId, collaboration }) {
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [typingUsers, setTypingUsers] = useState({}); // userId -> email
   const socketRef = useRef(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  const stopTypingTimer = useRef(null);
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -74,22 +76,45 @@ export default function TripChat({ shareId, collaboration }) {
 
     socket.on('new_message', (msg) => {
       setMessages((prev) => [...prev, msg]);
+      setTypingUsers((prev) => { const next = { ...prev }; delete next[msg.userId]; return next; });
+    });
+
+    socket.on('user_typing', ({ userId, email }) => {
+      if (userId === user.id) return;
+      setTypingUsers((prev) => ({ ...prev, [userId]: email }));
+    });
+
+    socket.on('user_stop_typing', ({ userId }) => {
+      setTypingUsers((prev) => { const next = { ...prev }; delete next[userId]; return next; });
     });
 
     return () => {
       socket.emit('leave_trip', shareId);
       socket.disconnect();
       socketRef.current = null;
+      clearTimeout(stopTypingTimer.current);
     };
   }, [shareId, user]);
+
+  const onChangeInput = (e) => {
+    setInput(e.target.value);
+    if (!socketRef.current?.connected) return;
+    socketRef.current.emit('typing', { shareId });
+    clearTimeout(stopTypingTimer.current);
+    stopTypingTimer.current = setTimeout(() => socketRef.current?.emit('stop_typing', { shareId }), 2000);
+  };
 
   const send = useCallback(() => {
     const text = input.trim();
     if (!text || !socketRef.current?.connected) return;
     socketRef.current.emit('chat_message', { shareId, text });
+    socketRef.current.emit('stop_typing', { shareId });
+    clearTimeout(stopTypingTimer.current);
     setInput('');
     inputRef.current?.focus();
   }, [input, shareId]);
+
+  const typingNames = Object.values(typingUsers).map((e) => e?.split('@')[0] || 'Someone');
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -209,13 +234,22 @@ export default function TripChat({ shareId, collaboration }) {
         <div ref={bottomRef} />
       </div>
 
+      {/* Typing indicator */}
+      {typingNames.length > 0 && (
+        <div className="px-4 pb-1 shrink-0">
+          <p className="text-[11px] text-slate-500 italic">
+            {typingNames.join(', ')} {typingNames.length === 1 ? 'is' : 'are'} typing…
+          </p>
+        </div>
+      )}
+
       {/* Input */}
       <div className="px-4 py-3 border-t border-slate-800 shrink-0">
         <div className="flex gap-2 items-end">
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={onChangeInput}
             onKeyDown={handleKeyDown}
             placeholder="Message the group… (Enter to send)"
             rows={1}
