@@ -288,7 +288,7 @@ export default function Home() {
             </section>
 
             {/* ── How it works ── */}
-            <section className="max-w-4xl mx-auto px-4 pb-16">
+            <section id="how-it-works" className="max-w-4xl mx-auto px-4 pb-16 scroll-mt-24">
               <div className="text-center mb-10">
                 <p className="eyebrow mb-3">How it works</p>
                 <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-ink">Ready in 3 simple steps</h2>
@@ -314,7 +314,7 @@ export default function Home() {
             </section>
 
             {/* ── Features ── */}
-            <section className="max-w-5xl mx-auto px-4 pb-16">
+            <section id="features" className="max-w-5xl mx-auto px-4 pb-16 scroll-mt-24">
               <div className="text-center mb-10">
                 <p className="eyebrow mb-3">What's included</p>
                 <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-ink">Everything a traveler needs</h2>

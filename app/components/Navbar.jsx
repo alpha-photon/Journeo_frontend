@@ -18,15 +18,18 @@ export default function Navbar({ onAuthClick, rightContent }) {
   const navLinks = [
     ...(exploreEnabled  ? [{ href: '/explore',      label: 'Explore' }]       : []),
     { href: '/my-trips',   label: 'My Trips' },
+    { href: '/#how-it-works', label: 'How it works' },
+    { href: '/#features',     label: 'Features' },
     ...(passportEnabled ? [{ href: '/passport',     label: 'Passport' }]      : []),
     ...(buddyEnabled    ? [{ href: '/travel-buddy', label: 'Travel Buddy' }]  : []),
+    ...(paymentsEnabled ? [{ href: '/pricing',       label: 'Pricing' }]      : []),
   ];
 
   return (
     <>
       <AnnouncementBanner />
       <header className="border-b border-line bg-paper/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-5 py-3.5 grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -44,13 +47,15 @@ export default function Navbar({ onAuthClick, rightContent }) {
             </div>
           </Link>
 
-          {/* Desktop nav links */}
-          <nav className="hidden md:flex items-center gap-1 mr-auto ml-8">
+          {/* Desktop nav links — centered column, so the bar reads as
+              balanced instead of everything clumped to the left with a
+              dead gap before the auth buttons. */}
+          <nav className="hidden md:flex items-center gap-1 justify-self-center">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm text-ink-muted hover:text-ink px-3 py-1.5 rounded-lg hover:bg-line-soft transition-all"
+                className="text-sm text-ink-muted hover:text-ink px-3 py-1.5 rounded-lg hover:bg-line-soft transition-all whitespace-nowrap"
               >
                 {link.label}
               </Link>
@@ -58,7 +63,7 @@ export default function Navbar({ onAuthClick, rightContent }) {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-self-end">
             {rightContent}
 
             {loading ? null : user ? (
