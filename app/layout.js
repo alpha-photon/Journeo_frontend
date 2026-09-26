@@ -1,6 +1,7 @@
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
 import { FeatureFlagProvider } from './context/FeatureFlagContext';
+import FeedbackWidget from './components/FeedbackWidget';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://journeo.com';
 
@@ -80,7 +81,10 @@ export default function RootLayout({ children }) {
           `}} />
         )}
         <FeatureFlagProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <FeedbackWidget />
+          </AuthProvider>
         </FeatureFlagProvider>
       </body>
     </html>
